@@ -8,6 +8,12 @@ cd apps/backend
 Create a new .venv
 python -m venv .venv
 
+install dependencies before starting
+{
+python -m pip install uvicorn
+python -m pip install FastAPI
+python -m pip install requests
+}
 Activate it:
 
 Windows PowerShell
