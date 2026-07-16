@@ -1,50 +1,109 @@
 "use client";
 
 import { useState } from "react";
+
+import Header from "../components/layout/Header";
+import Sidebar from "../components/layout/sidebar";
+import ChatWindow from "../components/chat/ChatWindow";
+import ChatInput from "../components/chat/ChatInput";
+
 import api from "../lib/api";
+import { Message } from "../types/chat";
 
 export default function Home() {
   const [message, setMessage] = useState("");
-  const [response, setResponse] = useState("");
+
+  const [messages, setMessages] = useState<Message[]>([]);
+
+  const [loading, setLoading] = useState(false);
+
+  const [chats] = useState<string[]>([
+    "New Chat",
+  ]);
+
+  const [activeChat, setActiveChat] = useState(0);
 
   async function sendMessage() {
-    if (!message.trim()) return;
+    if (!message.trim() || loading) return;
+
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      sender: "user",
+      text: message,
+      timestamp: new Date(),
+    };
+
+    setMessages((prev) => [...prev, userMessage]);
+
+    const currentMessage = message;
+
+    setMessage("");
+
+    setLoading(true);
 
     try {
       const res = await api.post("/chat", {
-        message,
+        message: currentMessage,
       });
 
-      setResponse(res.data.response);
+      const aiMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        sender: "assistant",
+        text: res.data.response,
+        timestamp: new Date(),
+      };
+
+      setMessages((prev) => [...prev, aiMessage]);
     } catch (error) {
       console.error(error);
-      setResponse("❌ Unable to connect to First-Son.");
+
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        sender: "assistant",
+        text: "❌ Unable to connect to First-Son.",
+        timestamp: new Date(),
+      };
+
+      setMessages((prev) => [...prev, errorMessage]);
+    } finally {
+      setLoading(false);
     }
   }
 
-  return (
-    <main className="min-h-screen bg-black text-white flex flex-col p-8">
-      <h1 className="text-4xl font-bold mb-8">🤖 First-Son</h1>
+  function newChat() {
+    setMessages([]);
+    setMessage("");
+  }
 
-      <textarea
-        className="bg-zinc-900 p-4 rounded-lg border border-zinc-700"
-        rows={4}
-        placeholder="Ask First-Son anything..."
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
+  return (
+    <main className="flex h-screen bg-black text-white">
+
+      <Sidebar
+        chats={chats}
+        activeChat={activeChat}
+        setActiveChat={setActiveChat}
       />
 
-      <button
-        onClick={sendMessage}
-        className="mt-4 bg-blue-600 hover:bg-blue-700 rounded-lg px-6 py-3"
-      >
-        Send
-      </button>
+      <div className="flex flex-1 flex-col">
 
-      <div className="mt-8 bg-zinc-900 rounded-lg p-4 min-h-40">
-        <h2 className="font-bold mb-2">First-Son says:</h2>
-        <p>{response}</p>
+        <Header
+          onNewChat={newChat}
+        />
+
+        <ChatWindow
+          messages={messages}
+          loading={loading}
+        />
+
+        <ChatInput
+          message={message}
+          setMessage={setMessage}
+          sendMessage={sendMessage}
+          loading={loading}
+        />
+
       </div>
+
     </main>
   );
 }

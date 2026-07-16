@@ -1,29 +1,19 @@
-import httpx
-from app.core.system_prompt import SYSTEM_PROMPT
-from app.core.config import OLLAMA_HOST, OLLAMA_MODEL
+import requests
+
+OLLAMA_URL = "http://localhost:11434/api/generate"
+MODEL = "first-son:latest"
 
 
-class OllamaService:
+def generate_response(message: str):
+    payload = {
+        "model": MODEL,
+        "prompt": message,
+        "stream": False,
+    }
 
-    async def chat(self, message: str):
+    response = requests.post(OLLAMA_URL, json=payload)
+    response.raise_for_status()
 
-        async with httpx.AsyncClient(timeout=120) as client:
+    data = response.json()
 
-            response = await client.post(
-                f"{OLLAMA_HOST}/api/generate",
-                json={
-    "model": OLLAMA_MODEL,
-    "system": SYSTEM_PROMPT,
-    "prompt": message,
-    "stream": False,
-}
-            )
-
-            response.raise_for_status()
-
-            data = response.json()
-
-            return data["response"]
-
-
-ollama_service = OllamaService()
+    return data["response"]
