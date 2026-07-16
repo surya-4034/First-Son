@@ -29,4 +29,4 @@
 - Desktop Application
 
 ## Phase 8
-- Multi-Agent AI System
+- Multi-Agent AI System with LLMs
