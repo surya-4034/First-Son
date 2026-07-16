@@ -5,7 +5,9 @@ first start backend server
 
 ```bash
 cd apps/backend
-Enter:.venv\Scripts\activate
+Step1:apps/backend/:".\.venv\Scripts\Activate.ps1"
+Enter
+Enter:python -m uvicorn app.main:app --reload
 
 After start frontend server
 
@@ -14,4 +16,8 @@ After start frontend server
 cd apps/frontend
 npm run dev
  and open http://localhost:3000
+
  to observe backend open http://localhost:8000
+=======
+ to observe backend open http://localhost:8000
+
