@@ -5,6 +5,42 @@ first start backend server
 
 ```bash
 cd apps/backend
+Create a new .venv
+python -m venv .venv
+
+Activate it:
+
+Windows PowerShell
+
+.\.venv\Scripts\Activate.ps1
+Step 5: Install all dependencies at once
+
+Run:
+
+pip install -r requirements.txt
+
+Now all packages will be installed automatically.
+
+Step 6: Make VS Code use the new .venv
+
+VS Code:
+
+Ctrl + Shift + P
+↓
+Python: Select Interpreter
+↓
+Choose:
+apps/backend/.venv/Scripts/python.exe
+Also add .venv to .gitignore
+
+Never upload your virtual environment:
+
+Create/edit .gitignore:
+
+.venv/
+__pycache__/
+*.pyc
+.env
 Step1:apps/backend/:".\.venv\Scripts\Activate.ps1"
 Enter
 Enter:python -m uvicorn app.main:app --reload
