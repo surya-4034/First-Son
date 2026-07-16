@@ -1,33 +1,44 @@
 "use client";
 
 import { useState } from "react";
-import Header from "../components/Header";
-import ChatWindow from "../components/ChatWindow";
-import ChatInput from "../components/ChatInput";
+
+import Header from "../components/layout/Header";
+import Sidebar from "../components/layout/sidebar";
+import ChatWindow from "../components/chat/ChatWindow";
+import ChatInput from "../components/chat/ChatInput";
+
 import api from "../lib/api";
 import { Message } from "../types/chat";
 
 export default function Home() {
   const [message, setMessage] = useState("");
+
   const [messages, setMessages] = useState<Message[]>([]);
+
   const [loading, setLoading] = useState(false);
 
-  async function sendMessage() {
-    if (!message.trim()) return;
+  const [chats] = useState<string[]>([
+    "New Chat",
+  ]);
 
-    // User message
+  const [activeChat, setActiveChat] = useState(0);
+
+  async function sendMessage() {
+    if (!message.trim() || loading) return;
+
     const userMessage: Message = {
-      id: Date.now(),
+      id: Date.now().toString(),
       sender: "user",
       text: message,
+      timestamp: new Date(),
     };
 
     setMessages((prev) => [...prev, userMessage]);
 
     const currentMessage = message;
+
     setMessage("");
 
-    // Show typing indicator
     setLoading(true);
 
     try {
@@ -35,11 +46,11 @@ export default function Home() {
         message: currentMessage,
       });
 
-      // AI response
       const aiMessage: Message = {
-        id: Date.now() + 1,
+        id: (Date.now() + 1).toString(),
         sender: "assistant",
         text: res.data.response,
+        timestamp: new Date(),
       };
 
       setMessages((prev) => [...prev, aiMessage]);
@@ -47,32 +58,52 @@ export default function Home() {
       console.error(error);
 
       const errorMessage: Message = {
-        id: Date.now() + 1,
+        id: (Date.now() + 1).toString(),
         sender: "assistant",
         text: "❌ Unable to connect to First-Son.",
+        timestamp: new Date(),
       };
 
       setMessages((prev) => [...prev, errorMessage]);
     } finally {
-      // Hide typing indicator
       setLoading(false);
     }
   }
 
+  function newChat() {
+    setMessages([]);
+    setMessage("");
+  }
+
   return (
-    <main className="min-h-screen bg-black text-white flex flex-col">
-      <Header />
+    <main className="flex h-screen bg-black text-white">
 
-      <ChatWindow
-        messages={messages}
-        loading={loading}
+      <Sidebar
+        chats={chats}
+        activeChat={activeChat}
+        setActiveChat={setActiveChat}
       />
 
-      <ChatInput
-        message={message}
-        setMessage={setMessage}
-        sendMessage={sendMessage}
-      />
+      <div className="flex flex-1 flex-col">
+
+        <Header
+          onNewChat={newChat}
+        />
+
+        <ChatWindow
+          messages={messages}
+          loading={loading}
+        />
+
+        <ChatInput
+          message={message}
+          setMessage={setMessage}
+          sendMessage={sendMessage}
+          loading={loading}
+        />
+
+      </div>
+
     </main>
   );
 }
