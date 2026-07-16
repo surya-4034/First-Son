@@ -50,6 +50,8 @@ After start frontend server
 ```bash
 
 cd apps/frontend
+step1:npm install
+step2:
 npm run dev
  and open http://localhost:3000
 
