@@ -13,3 +13,5 @@ After start frontend server
 
 cd apps/frontend
 npm run dev
+ and open http://localhost:3000
+ to observe backend open http://localhost:8000
