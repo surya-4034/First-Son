@@ -1,50 +1,78 @@
 "use client";
 
 import { useState } from "react";
+import Header from "../components/Header";
+import ChatWindow from "../components/ChatWindow";
+import ChatInput from "../components/ChatInput";
 import api from "../lib/api";
+import { Message } from "../types/chat";
 
 export default function Home() {
   const [message, setMessage] = useState("");
-  const [response, setResponse] = useState("");
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [loading, setLoading] = useState(false);
 
   async function sendMessage() {
     if (!message.trim()) return;
 
+    // User message
+    const userMessage: Message = {
+      id: Date.now(),
+      sender: "user",
+      text: message,
+    };
+
+    setMessages((prev) => [...prev, userMessage]);
+
+    const currentMessage = message;
+    setMessage("");
+
+    // Show typing indicator
+    setLoading(true);
+
     try {
       const res = await api.post("/chat", {
-        message,
+        message: currentMessage,
       });
 
-      setResponse(res.data.response);
+      // AI response
+      const aiMessage: Message = {
+        id: Date.now() + 1,
+        sender: "assistant",
+        text: res.data.response,
+      };
+
+      setMessages((prev) => [...prev, aiMessage]);
     } catch (error) {
       console.error(error);
-      setResponse("❌ Unable to connect to First-Son.");
+
+      const errorMessage: Message = {
+        id: Date.now() + 1,
+        sender: "assistant",
+        text: "❌ Unable to connect to First-Son.",
+      };
+
+      setMessages((prev) => [...prev, errorMessage]);
+    } finally {
+      // Hide typing indicator
+      setLoading(false);
     }
   }
 
   return (
-    <main className="min-h-screen bg-black text-white flex flex-col p-8">
-      <h1 className="text-4xl font-bold mb-8">🤖 First-Son</h1>
+    <main className="min-h-screen bg-black text-white flex flex-col">
+      <Header />
 
-      <textarea
-        className="bg-zinc-900 p-4 rounded-lg border border-zinc-700"
-        rows={4}
-        placeholder="Ask First-Son anything..."
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
+      <ChatWindow
+        messages={messages}
+        loading={loading}
       />
 
-      <button
-        onClick={sendMessage}
-        className="mt-4 bg-blue-600 hover:bg-blue-700 rounded-lg px-6 py-3"
-      >
-        Send
-      </button>
-
-      <div className="mt-8 bg-zinc-900 rounded-lg p-4 min-h-40">
-        <h2 className="font-bold mb-2">First-Son says:</h2>
-        <p>{response}</p>
-      </div>
+      <ChatInput
+        message={message}
+        setMessage={setMessage}
+        sendMessage={sendMessage}
+      />
     </main>
   );
 }
