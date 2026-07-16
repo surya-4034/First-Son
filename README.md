@@ -5,6 +5,8 @@ first start backend server
 
 ```bash
 cd apps/backend
+Step1:apps/backend/:".\.venv\Scripts\Activate.ps1"
+Enter
 Enter:python -m uvicorn app.main:app --reload
 
 After start frontend server
