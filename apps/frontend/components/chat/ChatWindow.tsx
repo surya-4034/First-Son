@@ -41,7 +41,7 @@ export default function ChatWindow({
         />
       ))}
 
-      {loading && <TypingIndicator />}
+     
 
       <div ref={bottomRef} />
 

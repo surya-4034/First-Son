@@ -5,14 +5,20 @@ from app.core.config import MODEL_NAME, OLLAMA_URL, TIMEOUT
 from app.core.system_prompt import SYSTEM_PROMPT
 
 
-def generate_response(message: str) -> str:
+def generate_response(messages):
     """
-    Returns the complete AI response at once.
-    Used by: POST /chat
+    Generate a complete response using Ollama Chat API.
     """
+
     payload = {
         "model": MODEL_NAME,
-        "prompt": f"{SYSTEM_PROMPT}\n\nUser: {message}\nAssistant:",
+        "messages": [
+            {
+                "role": "system",
+                "content": SYSTEM_PROMPT,
+            },
+            *messages,
+        ],
         "stream": False,
     }
 
@@ -26,20 +32,26 @@ def generate_response(message: str) -> str:
 
     data = response.json()
 
-    return data["response"]
+    return data["message"]["content"]
 
 
-def generate_stream(message: str):
+def generate_stream(messages):
     """
-    Streams the AI response token by token.
-    Used by: POST /chat/stream
+    Stream a response using Ollama Chat API.
     """
 
     payload = {
         "model": MODEL_NAME,
-        "prompt": f"{SYSTEM_PROMPT}\n\nUser: {message}\nAssistant:",
+        "messages": [
+            {
+                "role": "system",
+                "content": SYSTEM_PROMPT,
+            },
+            *messages,
+        ],
         "stream": True,
     }
+    print("Sending request to Ollama...")
 
     response = requests.post(
         OLLAMA_URL,
@@ -49,13 +61,15 @@ def generate_stream(message: str):
     )
 
     response.raise_for_status()
+    print("Connected to Ollama")
 
     for line in response.iter_lines():
+        print(line)
 
         if not line:
             continue
 
-        data = json.loads(line.decode("utf-8"))
+        data = json.loads(line.decode())
 
-        if "response" in data:
-            yield data["response"]
+        if "message" in data:
+            yield data["message"]["content"]

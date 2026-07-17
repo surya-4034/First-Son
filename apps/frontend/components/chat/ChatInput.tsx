@@ -1,3 +1,5 @@
+"use client";
+
 import { useRef, KeyboardEvent } from "react";
 import Button from "../ui/Button";
 import { PLACEHOLDER } from "../../utils/constants";
@@ -15,6 +17,8 @@ export default function ChatInput({
   sendMessage,
   loading,
 }: Props) {
+  console.log("✅ ChatInput rendered");
+
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   function handleKeyDown(e: KeyboardEvent<HTMLTextAreaElement>) {

@@ -1,5 +1,5 @@
 import { Message } from "../../types/chat";
-
+import TypingIndicator from "./TypingIndicator";
 interface Props {
   message: Message;
 }
@@ -26,8 +26,11 @@ export default function MessageBubble({ message }: Props) {
             : "bg-zinc-800 text-white rounded-bl-md"
         }`}
       >
-        {message.text}
-      </div>
+{message.text.length === 0 ? (
+  <TypingIndicator />
+) : (
+  message.text
+)}      </div>
 
       {isUser && (
         <div className="w-10 h-10 rounded-full bg-green-600 flex items-center justify-center text-lg">
