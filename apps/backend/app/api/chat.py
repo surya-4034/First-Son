@@ -1,19 +1,25 @@
 from fastapi import APIRouter
-from pydantic import BaseModel
+from fastapi.responses import StreamingResponse
 
-from app.services.ollama_service import generate_response
+from app.schemas.chat import ChatRequest, ChatResponse
+from app.services.ollama_service import (
+    generate_response,
+    generate_stream,
+)
 
 router = APIRouter()
 
 
-class ChatRequest(BaseModel):
-    message: str
+@router.post("/chat", response_model=ChatResponse)
+def chat(request: ChatRequest):
+    return ChatResponse(
+        response=generate_response(request.message)
+    )
 
 
-@router.post("/chat")
-def chat(req: ChatRequest):
-    answer = generate_response(req.message)
-
-    return {
-        "response": answer
-    }
+@router.post("/chat/stream")
+def stream_chat(request: ChatRequest):
+    return StreamingResponse(
+        generate_stream(request.message),
+        media_type="text/plain",
+    )
