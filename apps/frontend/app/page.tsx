@@ -1,152 +1,106 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import Header from "../components/layout/Header";
 import Sidebar from "../components/layout/Sidebar";
 import ChatWindow from "../components/chat/ChatWindow";
 import ChatInput from "../components/chat/ChatInput";
 
-import { Message } from "../types/chat";
+import { useChat } from "../hooks/useChat";
+import { useConversation } from "../hooks/useConversation";
 
 export default function Home() {
   const [message, setMessage] = useState("");
 
-  const [messages, setMessages] = useState<Message[]>([]);
+  const {
+    messages,
+    setMessages,
+    loading,
+    sendMessage,
+  } = useChat();
 
-  const [loading, setLoading] = useState(false);
+  const {
+    conversations,
+    activeConversationId,
+    createNewConversation,
+    loadConversation,
+    refreshSidebar,
+  } = useConversation();
 
-  const [chats] = useState<string[]>(["New Chat"]);
+ useEffect(() => {
+  if (conversations.length === 0) return;
 
-  const [activeChat, setActiveChat] = useState(0);
+  loadConversation(conversations[0].id)
+    .then(setMessages)
+    .catch(console.error);
 
-  async function sendMessage() {
-    async function sendMessage() {
-  console.log("sendMessage called");
+// eslint-disable-next-line react-hooks/exhaustive-deps
+}, []);
 
-  if (!message.trim() || loading) return;
+  async function handleNewChat() {
+  const id = await createNewConversation();
 
-  
+  setMessage("");
+
+  const msgs = await loadConversation(id);
+
+  setMessages(msgs);
 }
-    if (!message.trim() || loading) return;
+  async function handleOpenConversation(index: number) {
+    if (!conversations[index]) return;
 
-    const currentMessage = message;
+    const msgs = await loadConversation(
+      conversations[index].id
+    );
 
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      sender: "user",
-      text: currentMessage,
-      timestamp: new Date(),
-    };
-
-    setMessages((prev) => [...prev, userMessage]);
-
-    setMessage("");
-    setLoading(true);
-
-    const assistantId = (Date.now() + 1).toString();
-
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: assistantId,
-        sender: "assistant",
-        text: "",
-        timestamp: new Date(),
-      },
-    ]);
-
-    try {
-      const response = await fetch("http://127.0.0.1:8000/chat/stream", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-       body: JSON.stringify({
-  messages: [
-    ...messages.map((msg) => ({
-      role: msg.sender === "user" ? "user" : "assistant",
-      content: msg.text,
-    })),
-    {
-      role: "user",
-      content: currentMessage,
-    },
-  ],
-}),
-      });
-
-      if (!response.ok) {
-        throw new Error("Request failed");
-      }
-
-      if (!response.body) {
-        throw new Error("Streaming not supported.");
-      }
-
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-
-      let fullText = "";
-
-      while (true) {
-        const { done, value } = await reader.read();
-
-        if (done) break;
-
-        fullText += decoder.decode(value, { stream: true });
-
-        setMessages((prev) =>
-          prev.map((msg) =>
-            msg.id === assistantId
-              ? {
-                  ...msg,
-                  text: fullText,
-                }
-              : msg
-          )
-        );
-      }
-    } catch (error) {
-      console.error(error);
-
-      setMessages((prev) =>
-        prev.map((msg) =>
-          msg.id === assistantId
-            ? {
-                ...msg,
-                text: "❌ Unable to connect to First-Son.",
-              }
-            : msg
-        )
-      );
-    } finally {
-      setLoading(false);
-    }
+    setMessages(msgs);
   }
 
-  function newChat() {
-    setMessages([]);
+  async function handleSend() {
+    if (!activeConversationId) return;
+
+    const text = message.trim();
+
+    if (!text) return;
+
     setMessage("");
+
+  const activeConversation =
+  conversations.find(
+    (c) => c.id === activeConversationId
+  );
+
+await sendMessage(
+  activeConversationId,
+  text,
+  activeConversation?.title ?? "New Chat",
+  refreshSidebar
+);
   }
 
   return (
     <main className="flex h-screen bg-black text-white">
       <Sidebar
-        chats={chats}
-        activeChat={activeChat}
-        setActiveChat={setActiveChat}
+        chats={conversations.map((c) => c.title)}
+        activeChat={conversations.findIndex(
+          (c) => c.id === activeConversationId
+        )}
+        setActiveChat={handleOpenConversation}
       />
 
       <div className="flex flex-1 flex-col">
-        <Header onNewChat={newChat} />
+        <Header onNewChat={handleNewChat} />
 
-        <ChatWindow messages={messages} loading={loading} />
+        <ChatWindow
+          messages={messages}
+          loading={loading}
+        />
 
         <ChatInput
           message={message}
           setMessage={setMessage}
-          sendMessage={sendMessage}
+          sendMessage={handleSend}
           loading={loading}
         />
       </div>

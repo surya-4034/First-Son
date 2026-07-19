@@ -1,12 +1,14 @@
-from typing import List
-
 from pydantic import BaseModel
 
-from app.schemas.message import Message
+
+class ChatMessage(BaseModel):
+    role: str
+    content: str
 
 
 class ChatRequest(BaseModel):
-    messages: List[Message]
+    conversation_id: str
+    messages: list[ChatMessage]
 
 
 class ChatResponse(BaseModel):
