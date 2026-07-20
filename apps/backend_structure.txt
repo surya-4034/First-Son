@@ -1,0 +1,83 @@
+backend
+├── .gitignore
+├── app
+│   ├── Database
+│   │   └── database.py
+│   ├── agents
+│   │   ├── conversation_agent.py
+│   │   ├── memory_agent.py
+│   │   ├── planner_agent.py
+│   │   ├── router_agent.py
+│   │   └── title_agent.py
+│   ├── api
+│   │   ├── chat.py
+│   │   └── conversations.py
+│   ├── core
+│   │   ├── config.py
+│   │   └── system_prompt.py
+│   ├── evaluation
+│   │   └── __init__.py
+│   ├── execution
+│   │   └── __init__.py
+│   ├── llm
+│   │   ├── __init__.py
+│   │   ├── embeddings.py
+│   │   ├── ollama.py
+│   │   └── title_generator.py
+│   ├── main.py
+│   ├── memory
+│   │   ├── chrom_store.py
+│   │   ├── conversation_memory.py
+│   │   ├── embedding.py
+│   │   ├── long_term_memory.py
+│   │   ├── user_profile.py
+│   │   └── vector_store.py
+│   ├── models
+│   │   ├── __init__.py
+│   │   ├── conversation.py
+│   │   └── message.py
+│   ├── orchestrator
+│   │   ├── __init__.py
+│   │   └── planner.py
+│   ├── plugins
+│   │   └── __init__.py
+│   ├── prompts
+│   │   └── __init__.py
+│   ├── rag
+│   │   ├── __init__.py
+│   │   ├── chunker.py
+│   │   ├── document_loader.py
+│   │   ├── knowledge_manager.py
+│   │   └── retriever.py
+│   ├── schemas
+│   │   ├── chat.py
+│   │   ├── conversation.py
+│   │   └── message.py
+│   ├── security
+│   │   └── __init__.py
+│   ├── services
+│   │   └── ollama_service.py
+│   ├── skills
+│   │   └── __init__.py
+│   ├── telemetry
+│   │   └── __init__.py
+│   ├── tools
+│   │   ├── browser.py
+│   │   ├── filesystem.py
+│   │   └── terminal.py
+│   ├── training
+│   │   ├── __init__.py
+│   │   ├── dataset_loader.py
+│   │   ├── dataset_manager.py
+│   │   ├── fine_tune.py
+│   │   └── training_manager.py
+│   ├── utils
+│   │   └── __init__.py
+│   ├── vision
+│   │   └── __init__.py
+│   └── voice
+│       └── __init__.py
+├── first_son.db
+└── requirements.txt
+
+25 directories, 56 files

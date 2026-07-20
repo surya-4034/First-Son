@@ -9,12 +9,13 @@ from app.models.conversation import Conversation
 
 from app.schemas.chat import ChatRequest, ChatResponse
 
-from app.agents.conversation_agent import (
-    ConversationAgent,
-)
+from app.agents.conversation_agent import ConversationAgent
+from app.agents.title_agent import TitleAgent
 
 router = APIRouter()
+
 conversation_agent = ConversationAgent()
+title_agent = TitleAgent()
 
 
 @router.post("/chat", response_model=ChatResponse)
@@ -33,9 +34,12 @@ def chat(
     )
     db.commit()
 
+    messages = [m.model_dump() for m in request.messages]
+
     answer = conversation_agent.chat(
-    [m.model_dump() for m in request.messages]
-)
+        request.conversation_id,
+        messages,
+    )
 
     db.add(
         Message(
@@ -54,14 +58,16 @@ def chat(
         .first()
     )
 
-    if (
-        conversation
-        and conversation.title == "New Chat"
-    ):
+    if conversation and conversation.title == "New Chat":
         try:
-            conversation.title = generate_title(
-                last_user.content,
-                answer,
+            conversation.title = title_agent.generate(
+                messages
+                + [
+                    {
+                        "role": "assistant",
+                        "content": answer,
+                    }
+                ]
             )
 
             db.commit()
@@ -86,15 +92,17 @@ def stream_chat(
             content=last_user.content,
         )
     )
-
     db.commit()
+
+    messages = [m.model_dump() for m in request.messages]
 
     def stream_generator():
         full_response = ""
 
         for chunk in conversation_agent.stream(
-    [m.model_dump() for m in request.messages]
-):
+            request.conversation_id,
+            messages,
+        ):
             full_response += chunk
             yield chunk
 
@@ -105,7 +113,6 @@ def stream_chat(
                 content=full_response,
             )
         )
-
         db.commit()
 
         conversation = (
@@ -116,14 +123,16 @@ def stream_chat(
             .first()
         )
 
-        if (
-            conversation
-            and conversation.title == "New Chat"
-        ):
+        if conversation and conversation.title == "New Chat":
             try:
-                conversation.title = generate_title(
-                    last_user.content,
-                    full_response,
+                conversation.title = title_agent.generate(
+                    messages
+                    + [
+                        {
+                            "role": "assistant",
+                            "content": full_response,
+                        }
+                    ]
                 )
 
                 db.commit()

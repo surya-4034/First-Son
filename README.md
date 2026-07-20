@@ -19,6 +19,8 @@ Activate it:
 Windows PowerShell
 
 .\.venv\Scripts\Activate.ps1
+
+for mac: source .venv/bin/activate
 Step 5: Install all dependencies at once
 
 Run:
@@ -49,7 +51,7 @@ __pycache__/
 .env
 Step1:apps/backend/:".\.venv\Scripts\Activate.ps1"
 Enter
-Enter:python -m uvicorn app.main:app --reload
+Enter:python3 -m uvicorn app.main:app --reload
 
 After start frontend server
 
