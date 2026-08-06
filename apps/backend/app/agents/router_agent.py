@@ -1,4 +1,4 @@
-from app.services.ollama_service import (
+from app.services.gemini_service import (
     generate_response,
     generate_stream,
 )
